@@ -83,13 +83,15 @@ public class EmployeeApp {
         panel.add(salaryField, gbc);
         gbc.gridwidth = 1;
 
-        gbc.gridx = 1;
-        gbc.gridy = 4;
-        panel.add(updateButton, gbc);
+        // Create a JPanel for the buttons with FlowLayout
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(updateButton);
+        buttonPanel.add(deleteButton);
 
         gbc.gridx = 1;
-        gbc.gridy = 5;
-        panel.add(deleteButton, gbc);
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        panel.add(buttonPanel, gbc);
 
         frame.add(panel, BorderLayout.CENTER);
         frame.setVisible(true);
@@ -175,19 +177,29 @@ public class EmployeeApp {
                 return;
             }
 
-            // Prepare the delete statement
-            PreparedStatement stmt = conn.prepareStatement("DELETE FROM employee WHERE id = ?");
-            stmt.setString(1, id);
+            // Show confirmation dialog without a question mark icon
+            int confirm = JOptionPane.showConfirmDialog(frame, "Are you sure you want to delete this employee?", 
+                                                        "Confirm Deletion", JOptionPane.YES_NO_OPTION, 
+                                                        JOptionPane.PLAIN_MESSAGE); // Remove the icon
 
-            // Execute the delete
-            int rowsDeleted = stmt.executeUpdate();
+            if (confirm == JOptionPane.YES_OPTION) {
+                // Prepare the delete statement
+                PreparedStatement stmt = conn.prepareStatement("DELETE FROM employee WHERE id = ?");
+                stmt.setString(1, id);
 
-            if (rowsDeleted > 0) {
-                JOptionPane.showMessageDialog(frame, "Employee deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                clearFields();
+                // Execute the delete
+                int rowsDeleted = stmt.executeUpdate();
+
+                if (rowsDeleted > 0) {
+                    JOptionPane.showMessageDialog(frame, "Employee deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    clearFields();
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Employee not found!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
-                JOptionPane.showMessageDialog(frame, "Employee not found!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Delete operation canceled.", "Canceled", JOptionPane.INFORMATION_MESSAGE);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
